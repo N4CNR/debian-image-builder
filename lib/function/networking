@@ -27,9 +27,6 @@ if [[ ! -f "/lib/firmware/xc3028L-v36.fw" ]]; then ${ARIA2} https://github.com/a
 if [[ ! -f "/lib/firmware/xc4000-1.4.fw" ]]; then ${ARIA2} https://github.com/armbian/firmware/raw/master/xc4000-1.4.fw; fi
 if [[ ! -f "/lib/firmware/dvb-fe-xc4000-1.4.fw" ]]; then ln -s /lib/firmware/xc4000-1.4.fw /lib/firmware/dvb-fe-xc4000-1.4.fw; fi
 cd ~
-# aic8800 wireless
-mkdir -p /lib/firmware/updates/aic8800
-cp -r /lib/firmware/aic8800/SDIO/aic8800*/{*.bin,*.txt} /lib/firmware/updates/aic8800
 }
 
 # Update regulatory db
@@ -39,10 +36,13 @@ if [[ "$DISTRO" == "ubuntu" ]]; then
 fi
 git clone --depth=1 -q https://kernel.googlesource.com/pub/scm/linux/kernel/git/sforshee/wireless-regdb
 sleep .25
-cd wireless-regdb
-cp -f regulatory.db /lib/firmware/regulatory.db
-cp -f regulatory.db.p7s /lib/firmware/regulatory.db.p7s
-cd ~
+if [[ -f "wireless-regdb/regulatory.db" ]] && [[ -f "wireless-regdb/regulatory.db.p7s" ]]; then
+	mkdir -p /lib/firmware/updates
+	cp -fr wireless-regdb/{regulatory.db,regulatory.db.p7s} /lib/firmware/updates/
+else
+	echo -e ""
+	echo -e "ERR: Missing regulatory db files?"
+fi
 rm -fdr wireless-regdb
 }
 
